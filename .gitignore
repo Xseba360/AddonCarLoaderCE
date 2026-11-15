@@ -1,0 +1,8 @@
+# plugin build output
+*.asi
+*.obj
+*.exp
+*.lib
+
+# release zips
+dist/

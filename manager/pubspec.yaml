@@ -1,0 +1,39 @@
+name: addon_car_manager
+description: "Add-on Car Manager CE: installs and manages add-on cars for GTA IV Complete Edition."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  archive: ^4.7.1
+  desktop_drop: ^0.8.4
+  file_selector: ^1.1.0
+  flutter:
+    sdk: flutter
+  forui: ^0.27.7
+  material_ui: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  test: ^1.32.0
+  forui_cli: ^0.27.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - fonts/Switzer-LICENSE.txt
+    - fonts/din1451alt-OFL.txt
+
+  # Switzer (ITF Free Font License, fonts/Switzer-LICENSE.txt) and Alte DIN 1451 Mittelschrift (SIL OFL, fonts/din1451alt-OFL.txt)
+  fonts:
+    - family: Switzer
+      fonts:
+        - asset: fonts/Switzer-Extrabold.ttf
+          weight: 800
+    - family: DIN1451
+      fonts:
+        - asset: fonts/din1451alt.ttf
