@@ -1,4 +1,4 @@
-"""Writes ../logo.svg: the name set in the app's two fonts, as outlines (an SVG on GitHub cannot
+"""Writes ../docs/media/logo.svg: the name set in the app's two fonts, as outlines (an SVG on GitHub cannot
 load a font). Run from manager/: python tool/make_logo.py
 Reads simple TrueType glyphs only (no composites), which is all the capitals and digits need."""
 import struct
@@ -133,7 +133,7 @@ def main():
 <path d="{tag}" fill="{GREY}"/>
 </svg>
 '''
-    open('../logo.svg', 'w', encoding='utf-8', newline='\n').write(svg)
+    open('../docs/media/logo.svg', 'w', encoding='utf-8', newline='\n').write(svg)
 
 
 if __name__ == '__main__':
