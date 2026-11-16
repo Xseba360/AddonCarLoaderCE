@@ -134,9 +134,12 @@ Directory mockGame({String version = AddonCarManager.supportedVersion, bool mods
   }
   if (!mods) return root;
 
-  for (final asi in [Paths.plugin, Paths.fusionFix, Paths.libertyPlates]) {
+  for (final asi in [Paths.fusionFix, Paths.libertyPlates]) {
     write('plugins/$asi', '');
   }
+  // the plugin as the app ships it, so it does not count as out of date
+  final shipped = AddonCarManager.bundledPlugin;
+  File('${root.path}/plugins/${Paths.plugin}').writeAsBytesSync(shipped.existsSync() ? shipped.readAsBytesSync() : const []);
   write(Paths.plateTypes, mockPlates);
   if (car) {
     final pkg = ModPackage.open(mockMod());

@@ -67,6 +67,10 @@ class Settings {
   /// Whether to ask GitHub for a newer release at startup; null until the user has been asked.
   static bool? get updatesOnStartup => _read()['updatesOnStartup'] as bool?;
   static set updatesOnStartup(bool? on) => _set('updatesOnStartup', on ?? false);
+
+  /// The app version in which "Don't remind me" was pressed on the out-of-date plugin notice.
+  static String? get pluginReminderOff => _read()['pluginReminderOff'] as String?;
+  static set pluginReminderOff(String? version) => _set('pluginReminderOff', version ?? '');
 }
 
 class Home extends StatefulWidget {
@@ -83,6 +87,7 @@ class _HomeState extends State<Home> {
   late String _root = widget.root ?? Settings.load();
   int _version = 0; // bumped after every change so all tabs re-read the files
   int _tab = 0;
+  bool _pluginLater = false; // "Not now" on the out-of-date notice: until the app is closed
   final _scroll = ScrollController(); // the open tab's list, so the wheel also works over the side margins
 
   AddonCarManager get _manager => AddonCarManager(_root);
@@ -213,17 +218,21 @@ class _HomeState extends State<Home> {
     });
   }
 
-  /// A red notice with the one button that fixes it.
-  Widget _notice(String title, String? label, VoidCallback onPress) => FAlert(
+  /// A red notice with the buttons that deal with it, the first one the fix.
+  Widget _notice(String title, List<(String, VoidCallback)> actions) => FAlert(
     variant: .destructive,
     title: Text(title),
-    subtitle: label == null
+    subtitle: actions.isEmpty
         ? null
-        : Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: FButton(variant: .outline, size: .sm, mainAxisSize: .min, onPress: onPress, child: Text(label)),
+        : Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final (i, (label, onPress)) in actions.indexed)
+                  FButton(variant: i == 0 ? .outline : .ghost, size: .sm, mainAxisSize: .min, onPress: onPress, child: Text(label)),
+              ],
             ),
           ),
   );
@@ -233,6 +242,7 @@ class _HomeState extends State<Home> {
     final m = _manager;
     final valid = _root.isNotEmpty && m.looksLikeGame;
     const tabs = ['Cars', 'Install', 'Traffic', 'Backups', 'About'];
+    void installPlugin() => runAction(context, 'Plugin installed', m.installPlugin, _changed);
     final version = valid ? m.gameVersion : null;
     return FScaffold(
       child: Listener(
@@ -292,13 +302,21 @@ class _HomeState extends State<Home> {
                     subtitle: const Text('Add-on cars need Complete Edition ${AddonCarManager.supportedVersion}.'),
                   )
                 else if (!m.fusionFixInstalled)
-                  _notice('FusionFix is not installed', 'Get FusionFix', () => Process.run('explorer', [fusionFixUrl]))
+                  _notice('FusionFix is not installed', [
+                    ('Get FusionFix', () => Process.run('explorer', [fusionFixUrl])),
+                  ])
                 else if (!m.pluginInstalled)
-                  _notice(
-                    '${Paths.plugin} is not installed',
-                    AddonCarManager.bundledPlugin.existsSync() ? 'Install' : null, // null: built without the plugin beside it
-                    () => runAction(context, 'Plugin installed', m.installPlugin, _changed),
-                  ),
+                  _notice('${Paths.plugin} is not installed', [
+                    // no button when the app was built without the plugin beside it
+                    if (AddonCarManager.bundledPlugin.existsSync()) ('Install', installPlugin),
+                  ])
+                else if (!_pluginLater && Settings.pluginReminderOff != appVersion && m.pluginDiffers)
+                  _notice('${Paths.plugin} is probably out of date', [
+                    ('Update', installPlugin),
+                    ('Not now', () => setState(() => _pluginLater = true)),
+                    // until the next version of the app, which ships another plugin
+                    ("Don't remind me", () => setState(() => Settings.pluginReminderOff = appVersion)),
+                  ]),
                 // Own tab row: FTabs lays its content out with unbounded height, which the scrolling pages cannot take
                 if (valid)
                   Align(

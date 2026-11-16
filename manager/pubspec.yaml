@@ -1,7 +1,7 @@
 name: addon_car_manager
 description: "Add-on Car Manager CE: installs and manages add-on cars for GTA IV Complete Edition."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: ^3.14.0

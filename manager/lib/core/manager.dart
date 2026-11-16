@@ -106,6 +106,20 @@ class AddonCarManager {
     return shipped.existsSync() ? shipped : File('${Directory.current.path}\\..\\${Paths.plugin}');
   }
 
+  /// The installed plugin is not the build shipped with this app. Usually an older one; the plugin
+  /// carries no version, so a newer one (installed by a newer manager) looks the same.
+  bool get pluginDiffers {
+    final installed = ['plugins/', 'scripts/', ''].map((d) => file('$d${Paths.plugin}')).where((f) => f.existsSync()).firstOrNull;
+    final shipped = bundledPlugin;
+    if (installed == null || !shipped.existsSync()) return false;
+    final a = installed.readAsBytesSync(), b = shipped.readAsBytesSync();
+    if (a.length != b.length) return true;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return true;
+    }
+    return false;
+  }
+
   /// Copies the shipped plugin to where it already is, else next to FusionFix, else into plugins\.
   Backup installPlugin() {
     const dirs = ['plugins/', 'scripts/', ''];

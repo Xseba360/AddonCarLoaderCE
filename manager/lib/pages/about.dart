@@ -10,7 +10,7 @@ import '../core/update.dart';
 import '../main.dart';
 import 'ui.dart';
 
-const appVersion = '0.1.0'; // keep in step with pubspec.yaml
+const appVersion = '0.2.0'; // keep in step with pubspec.yaml
 const repoUrl = 'https://github.com/Xseba360/AddonCarLoaderCE';
 
 /// What ships with the program, under which license, and where its text is: a bundled asset

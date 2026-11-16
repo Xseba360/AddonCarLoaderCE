@@ -115,6 +115,26 @@ void main() {
     expect(find.text('Install mockgtx2'), findsOneWidget);
   });
 
+  testWidgets('another plugin build in the game: the out-of-date notice, dismissed by Not now', (tester) async {
+    final other = mockGame().path;
+    addTearDown(() => Directory(other).deleteSync(recursive: true));
+    AddonCarManager(other).file('plugins/${Paths.plugin}').writeAsStringSync('an older build');
+    tester.view.physicalSize = const Size(1280, 860);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(Application(root: other));
+    await tester.pumpAndSettle();
+    expect(find.text('${Paths.plugin} is probably out of date'), findsOneWidget);
+    for (final button in ['Update', 'Not now', "Don't remind me"]) {
+      expect(find.text(button), findsOneWidget);
+    }
+    await tester.tap(find.text('Not now'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('probably out of date'), findsNothing);
+    expect(tester.takeException(), isNull);
+  }, skip: !AddonCarManager.bundledPlugin.existsSync());
+
   testWidgets('small windows: every tab and the traffic dialog fit without overflow', (tester) async {
     // the real fonts: the test font's square glyphs are wider and overflow where the app does not
     await tester.runAsync(() async {

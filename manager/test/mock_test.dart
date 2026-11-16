@@ -44,7 +44,14 @@ void main() {
     m.file('plugins/${Paths.fusionFix}').renameSync(m.file('scripts/${Paths.fusionFix}').path);
     expect(m.pluginInstalled, isFalse);
 
+    // another build in place: flagged, and the install replaces it
+    m.file('scripts/${Paths.plugin}').writeAsStringSync('an older build');
+    expect(m.pluginDiffers, isTrue);
+    m.file('scripts/${Paths.plugin}').deleteSync();
+    expect(m.pluginDiffers, isFalse, reason: 'missing is not out of date');
+
     final b = m.installPlugin();
+    expect(m.pluginDiffers, isFalse);
     expect(m.file('scripts/${Paths.plugin}').readAsBytesSync(), shipped);
     m.installPlugin(); // again: same place, no second copy
     expect(m.file('plugins/${Paths.plugin}').existsSync(), isFalse);
