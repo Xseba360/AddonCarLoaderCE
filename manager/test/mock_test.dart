@@ -229,6 +229,23 @@ void main() {
     expect(m.withOwnNameKey(filled, 'Sultan Tuned').gameName, 'SULTAN2');
   });
 
+  test('an episode without cargrp.dat has no traffic groups instead of failing', () {
+    final m = AddonCarManager(game().path);
+    m.file(Episode.tlad.originalCarGroups).deleteSync();
+    expect(m.readCarGroups(Episode.tlad).groups, isEmpty);
+    expect(m.readCarGroups(Episode.iv).groups, hasLength(47));
+    expect(m.trafficGroupsOf('mockgt').keys, [Episode.iv, Episode.tbogt]);
+    m.setTrafficGroups(
+      ['mockgt'],
+      {
+        Episode.iv: {0: true},
+        Episode.tlad: {},
+      },
+    );
+    expect(m.trafficGroupsOf('mockgt')[Episode.iv], ['Harlem']);
+    m.remove('mockgt'); // walks every episode's groups
+  });
+
   test('replace mods take the missing lines from the game files', () {
     final m = AddonCarManager(game().path);
     expect(m.gameCar('mockgt'), isNull);

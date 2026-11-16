@@ -51,6 +51,12 @@ class _GroupsPageState extends State<GroupsPage> {
           selected: _episode,
           onSelect: (e) => setState(() => _episode = e),
         ),
+        if (groups.isEmpty)
+          FAlert(
+            variant: .destructive,
+            title: Text('No cargrp.dat for ${_episode.title}'),
+            subtitle: Text(m.file(_episode.originalCarGroups).path),
+          ),
         Expanded(
           child: ListPanel(
             itemCount: groups.length,

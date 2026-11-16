@@ -744,9 +744,11 @@ class AddonCarManager {
   // ---------------------------------------------------------------- traffic groups
 
   /// The episode's car groups: the update\ copy if it exists, else the game's own file.
+  /// The episode's traffic groups: the update\ copy, else the game's own file. No groups when the
+  /// game has neither (an episode that is not installed).
   CarGroups readCarGroups(Episode e) {
     final f = file(e.carGroups).existsSync() ? file(e.carGroups) : file(e.originalCarGroups);
-    return CarGroups.parse(latin1.decode(f.readAsBytesSync()));
+    return CarGroups.parse(f.existsSync() ? latin1.decode(f.readAsBytesSync()) : '');
   }
 
   Backup saveCarGroups(Episode e, CarGroups groups, String action) {

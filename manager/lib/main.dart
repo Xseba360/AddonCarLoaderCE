@@ -98,16 +98,8 @@ class _HomeState extends State<Home> {
   /// One question at a time: the game folder first, and only with a game open the one about updates.
   Future<void> _startup() async {
     if (_root.isEmpty) await _offerFound();
-    // a folder handed in (tests) stays offline and leaves the saved settings alone
-    if (!mounted || widget.root != null || _root.isEmpty || !_manager.looksLikeGame) return;
-    Settings.updatesOnStartup ??= await confirm(
-      context,
-      'Check for updates on startup?',
-      'You can change this on the About tab.',
-      ok: 'Yes',
-      cancel: 'No',
-    );
-    if (Settings.updatesOnStartup != true) return;
+    await _askUpdates();
+    if (!mounted || widget.root != null || Settings.updatesOnStartup != true) return;
     try {
       final latest = await latestRelease();
       if (latest == null || !isNewer(latest.$1, appVersion) || !mounted) return;
@@ -195,7 +187,22 @@ class _HomeState extends State<Home> {
 
   Future<void> _pickFolder() async {
     final dir = await getDirectoryPath(confirmButtonText: 'Use this folder', initialDirectory: _root.isEmpty ? null : _root);
-    if (dir != null) _use(dir);
+    if (dir == null) return;
+    _use(dir);
+    await _askUpdates(); // the first game folder may be picked here, long after startup
+  }
+
+  /// Asked once, and only with a game folder open.
+  Future<void> _askUpdates() async {
+    // a folder handed in (tests) leaves the saved settings alone
+    if (!mounted || widget.root != null || !_manager.looksLikeGame || Settings.updatesOnStartup != null) return;
+    Settings.updatesOnStartup = await confirm(
+      context,
+      'Check for updates on startup?',
+      'You can change this on the About tab.',
+      ok: 'Yes',
+      cancel: 'No',
+    );
   }
 
   void _use(String dir) {

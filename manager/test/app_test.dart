@@ -61,6 +61,16 @@ void main() {
       expect(tester.takeException(), isNull, reason: e);
     }
 
+    // an episode whose cargrp.dat is gone gets a notice, not a blank tab
+    AddonCarManager(game).file(Episode.tlad.originalCarGroups).renameSync('$game/cargrp.bak');
+    await tester.tap(find.text('The Lost and Damned'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('No cargrp.dat for The Lost and Damned'), findsOneWidget);
+    File('$game/cargrp.bak').renameSync(AddonCarManager(game).file(Episode.tlad.originalCarGroups).path);
+    await tester.tap(find.text('GTA IV'));
+    await tester.pumpAndSettle();
+
     // the mouse wheel over the empty margin left of the list scrolls the list
     ScrollPosition list() =>
         tester.state<ScrollableState>(find.descendant(of: find.byType(ListView), matching: find.byType(Scrollable)).first).position;
